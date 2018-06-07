@@ -1,6 +1,6 @@
 #lang racket
 (require "AVLtrees_DD.rkt")
-(provide height balanced? balance rotate insert node node-l node-r node-v NULL)
+(provide height balanced? balance rotate insert node node-l node-r node-v NULL delete)
 
 ;; Node -> Boolean
 ;; returns true if tree is balanced (absolute value of R-L <= 1)
@@ -68,18 +68,17 @@
 ;; Performs a L rotation on a tree
 
 (define (l-rotate n)
-         (node (node (node-l n) (node-l (node-r n)) (node-v n)) (node-r (node-r n)) (node-v (node-r n))))
+  (node (node (node-l n) (node-l (node-r n)) (node-v n)) (node-r (node-r n)) (node-v (node-r n))))
 
 ;; Node -> Node
 ;; Performs a R rotation on a tree
 
 
 (define (r-rotate n)
-      (node (node-l (node-l n)) (node (node-r (node-l n)) (node-r n) (node-v n)) (node-v (node-l n))))
+  (node (node-l (node-l n)) (node (node-r (node-l n)) (node-r n) (node-v n)) (node-v (node-l n))))
 
 ;; Node -> Node
 ;; Performs a LR rotation on a tree
-
 
 (define (lr-rotate n)
   (l-rotate (node (node-l n) (r-rotate (node-r n)) (node-v n))))
@@ -89,6 +88,53 @@
 
 (define (rl-rotate n)
   (r-rotate (node (l-rotate (node-l n)) (node-r n) (node-v n))))
+
+;; Natural Node -> Node
+;; Deletes a node from a tree
+
+(define (delete t n)
+  (cond [(empty? t) t]
+        [else (cond [(= n (node-v t)) (balance (handle-delete t))]
+                    [(< n (node-v t)) (balance (node (delete (node-l t) n) (node-r t) (node-v t)))]
+                    [else (balance (node (node-l t) (delete (node-r t) n) (node-v t)))])]))
+
+;; Node -> Node
+;; Appropriately handles deletion of the node
+;; ASSUME: Tree is not empty
+
+(define (handle-delete t)
+  (cond [(and (empty? (node-l t)) (empty? (node-r t))) empty]
+        [(and (not (empty? (node-l t))) (not (empty? (node-r t)))) (predecessor-delete t)]
+        [else (if (empty? (node-l t))
+                  (node-r t)
+                  (node-l t))]))
+
+;; Node -> Node
+;; Performs a predecessor deletion on a tree
+
+(define (predecessor-delete t)
+  (local [(define predecessor (get-furthest-right (node-l t)))]
+    (node (delete-rightmost (node-l t)) (node-r t) (node-v predecessor))))
+    
+;; Node -> Node
+;; Gets the right most node in a tree
+
+(define (get-furthest-right t)
+  (local [(define (get-furthest-right t rsf)
+            (cond [(empty? t) rsf]
+                  [else (get-furthest-right (node-r t) t)]))]
+    (get-furthest-right t t)))
+
+;; Node -> Node
+;; Deletes the rightmost element in a tree
+
+(define (delete-rightmost t)
+  (cond [(empty? t) empty]
+        [else (if (empty? (node-r t))
+                  empty
+                  (node (node-l t) (delete-rightmost (node-r t)) (node-v t)))]))
+
+
 
 
 
