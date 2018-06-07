@@ -1,6 +1,10 @@
 #lang racket
 (require "AVLtrees_DD.rkt")
 (require 2htdp/image)
+
+;; Functions for operating on an AVL Tree.
+;; Copyright 2018 Kean Wong
+
 (provide height balanced? balance rotate insert node node-l node-r node-v NULL delete)
 
 ;; Node -> Boolean
