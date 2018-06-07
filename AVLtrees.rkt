@@ -1,5 +1,6 @@
 #lang racket
 (require "AVLtrees_DD.rkt")
+(require 2htdp/image)
 (provide height balanced? balance rotate insert node node-l node-r node-v NULL delete)
 
 ;; Node -> Boolean
@@ -133,6 +134,28 @@
         [else (if (empty? (node-r t))
                   empty
                   (node (node-l t) (delete-rightmost (node-r t)) (node-v t)))]))
+
+;; Node -> Image
+;; Produces an image of a tree
+
+(define RADIUS 15)
+(define COLOUR "blue")
+(define TEXT-COLOUR "white")
+(define TEXT-SIZE 12)
+
+
+(define (render t)
+  (cond [(empty? t) empty-image]
+        [else (above (node-image (node-v t))
+                     (beside (render (node-l t)) (render (node-r t))))]))
+
+;; Natural -> Image
+;; Produces an image of a node in a tree represented by a circle with text in the center
+
+(define (node-image n)
+  (overlay
+   (text (number->string n) TEXT-SIZE TEXT-COLOUR)
+   (circle RADIUS "solid" COLOUR)))
 
 
 
