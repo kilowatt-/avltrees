@@ -5,7 +5,7 @@
 ;; Functions for operating on an AVL Tree.
 ;; Copyright 2018 Kean Wong
 
-(provide height balanced? balance rotate insert node node-l node-r node-v NULL delete)
+(provide height balanced? balance rotate insert node node-l node-r node-v NULL delete traverse-in-order render traverse-level-order traverse-post-order traverse-pre-order)
 
 ;; Node -> Boolean
 ;; returns true if tree is balanced (absolute value of R-L <= 1)
@@ -55,8 +55,6 @@
 ;; Node -> Node
 ;; rotates a tree appropriately
 ;; ASSUME: Tree is unbalanced
-
-
 
 ;; Template from Node
 (define (rotate n)
@@ -139,6 +137,55 @@
                   empty
                   (node (node-l t) (delete-rightmost (node-r t)) (node-v t)))]))
 
+;; Node -> (listof Natural)
+;; Traverses a tree in in-order (L -> N -> R)
+
+(define (traverse-in-order t)
+  (cond [(empty? t) empty]
+        [else (append (traverse-in-order (node-l t))
+                      (list (node-v t))
+                      (traverse-in-order (node-r t)))]))
+
+;; Node -> (listof Natural)
+;; Traverses a tree in pre-order (N -> L -> R)
+
+(define (traverse-pre-order t)
+  (cond [(empty? t) empty]
+        [else (append (list (node-v t))
+                      (traverse-pre-order (node-l t))
+                      (traverse-pre-order (node-r t)))]))
+
+;; Node -> (listof Natural)
+;; Traverses a tree in post-order (L -> R -> N)
+
+(define (traverse-post-order t)
+  (cond [(empty? t) empty]
+        [else (append 
+                      (traverse-post-order (node-l t))
+                      (traverse-post-order (node-r t))
+                      (list (node-v t)))]))
+
+
+;; Node -> (listof Natural)
+;; Traverses a tree in level-order (N->L->R)
+
+(define (traverse-level-order t)
+  (local [
+    (define (fn-for-node t todo)
+      (cond [(empty? t) empty]
+            [else (append (list (node-v t))
+                          (fn-for-todo (append todo (create-todo-list t))))]))
+    (define (fn-for-todo todo)
+      (cond [(empty? todo) empty]
+            [else (fn-for-node (first todo) (rest todo))]))
+
+    (define (create-todo-list t)
+      (cond [(and (empty? (node-l t)) (empty? (node-r t))) empty]
+            [(empty? (node-l t)) (list (node-r t))]
+            [(empty? (node-r t)) (list (node-l t))]
+            [else (list (node-l t) (node-r t))]))]
+  (fn-for-node t empty)))
+
 ;; Node -> Image
 ;; Produces an image of a tree
 
@@ -171,3 +218,6 @@
 
 
 
+
+
+    
